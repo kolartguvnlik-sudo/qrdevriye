@@ -420,6 +420,37 @@ confirmBtn.onclick = () => { closeDisconnectModal(); disconnectProject(); };
     </div>
   </div>
 </div>
+<!-- PWA Yükleme Butonu -->
+<button id="installBtn" class="install-btn" style="position: fixed; top: 12px; left: 12px; font-size: 20px; display:none; z-index:500;">📲 Uygulamayı Yükle</button>
+
+<script>
+let deferredPrompt;
+const installBtn = document.getElementById('installBtn');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  installBtn.style.display = 'block';
+});
+
+installBtn.addEventListener('click', async () => {
+  installBtn.style.display = 'none';
+  if(deferredPrompt){
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    deferredPrompt = null;
+  }
+});
+
+// Service Worker kaydı
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(() => console.log('Service Worker kaydedildi.'))
+      .catch(err => console.error('Service Worker hatası:', err));
+  });
+}
+</script>
 
 </body>
 </html>
