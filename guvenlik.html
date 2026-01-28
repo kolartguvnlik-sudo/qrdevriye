@@ -239,6 +239,36 @@ body, div, span, p, h1, h2, h3, h4, h5, h6, label, input, button {
     font-size: 12px; /* mobilde küçültüldü */
   }
 }
+/* Mobilde devriye butonları düzeni */
+@media (max-width: 600px) {
+  .panel button {
+    width: 100% !important;      /* Tam genişlik */
+    margin: 8px 0 !important;    /* Üst-alt boşluk */
+    padding: 12px 0 !important;  /* Daha büyük tıklanabilir alan */
+    font-size: 16px !important;  /* Yazı okunabilir */
+    border-radius: 12px !important;
+  }
+
+  /* Olay ve Kargo butonlarını daha uyumlu yap */
+  #olayBtn {
+    background: #f39c12 !important;  /* turuncu */
+    color: #fff !important;
+  }
+
+  #kargoBtn {
+    background: #e67e22 !important;  /* biraz daha soft turuncu */
+    color: #fff !important;
+    position: relative;
+  }
+
+  /* Kargo rozeti konumu mobilde küçült */
+  #kargoBadge {
+    top: -4px;
+    right: -4px;
+    font-size: 10px;
+    padding: 1px 4px;
+  }
+}
 
 
 </style>
