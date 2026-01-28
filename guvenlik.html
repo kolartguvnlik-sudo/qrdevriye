@@ -227,8 +227,19 @@ body, div, span, p, h1, h2, h3, h4, h5, h6, label, input, button {
 }
 
 .offlineTextBlink {
-  animation: blinkRedSlow 2s infinite; /* 2 saniyede bir yanıp sönüyor */
+  animation: blinkRedSlow 2s infinite; /* yavaş yanıp sönme */
+  font-size: 16px;      /* varsayılan boyut */
+  white-space: nowrap;   /* tek satır */
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
+@media (max-width: 600px){
+  .offlineTextBlink {
+    font-size: 12px; /* mobilde küçültüldü */
+  }
+}
+
 
 </style>
 </head>
@@ -1100,19 +1111,18 @@ const qrContainers = document.querySelectorAll('.qr-list > div'); // QR kutular�
 
 function handleConnectionChange(){
     if(navigator.onLine){
-        // Online: eski haline dön
-        nobetStatus.classList.remove('blink-red'); // buton hızlı yanıp sönme
-        qrContainers.forEach(c => c.classList.remove('blink-red')); // QR kutuları eski haline dön
-        devriyePanelTitle.classList.remove('offlineTextBlink'); // yazı durur
+        nobetStatus.classList.remove('blink-red');
+        qrContainers.forEach(c => c.classList.remove('blink-red'));
+        devriyePanelTitle.classList.remove('offlineTextBlink');
         devriyePanelTitle.innerText = 'Devriye';
     } else {
-        // Offline: uyarı göster
-        nobetStatus.classList.add('blink-red'); // buton hızlı yanıp sönme
-        qrContainers.forEach(c => c.classList.add('blink-red')); // QR kutuları kırmızı yanıp sön
-        devriyePanelTitle.innerText = '⚠️ Offline Güvenli Mod Aktif 🔒';
-        devriyePanelTitle.classList.add('offlineTextBlink'); // yazı yavaş yanıp sönsün
+        nobetStatus.classList.add('blink-red');
+        qrContainers.forEach(c => c.classList.add('blink-red'));
+        devriyePanelTitle.classList.add('offlineTextBlink');
+        devriyePanelTitle.innerText = '‼️ Offline Güvenli Mod Aktif ‼️'; // iki taraf ünlem
     }
 }
+
 
 // Sayfa yüklendiğinde kontrol et
 handleConnectionChange();
