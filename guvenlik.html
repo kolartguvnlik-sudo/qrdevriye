@@ -239,10 +239,9 @@ body, div, span, p, h1, h2, h3, h4, h5, h6, label, input, button {
     font-size: 12px; /* mobilde küçültüldü */
   }
 }
-/* Sadece devriye butonlarını mobilde büyük yap */
+/* Mobilde devriye butonları düzeni */
 @media (max-width: 600px) {
-  /* Devriye butonlarını seçiyoruz */
-  .devriye-panel button {
+  .panel button {
     width: 100% !important;      /* Tam genişlik */
     margin: 8px 0 !important;    /* Üst-alt boşluk */
     padding: 12px 0 !important;  /* Daha büyük tıklanabilir alan */
@@ -250,6 +249,7 @@ body, div, span, p, h1, h2, h3, h4, h5, h6, label, input, button {
     border-radius: 12px !important;
   }
 
+  /* Olay ve Kargo butonlarını daha uyumlu yap */
   #olayBtn {
     background: #f39c12 !important;  /* turuncu */
     color: #fff !important;
@@ -261,6 +261,7 @@ body, div, span, p, h1, h2, h3, h4, h5, h6, label, input, button {
     position: relative;
   }
 
+  /* Kargo rozeti konumu mobilde küçült */
   #kargoBadge {
     top: -4px;
     right: -4px;
@@ -268,14 +269,11 @@ body, div, span, p, h1, h2, h3, h4, h5, h6, label, input, button {
     padding: 1px 4px;
   }
 }
-
-/* QR okut butonları mobilde eski boyutunda kalsın */
 .qr-list button {
   width: auto !important;
   padding: 6px 12px !important;
   font-size: 14px !important;
 }
-
 
 </style>
 </head>
