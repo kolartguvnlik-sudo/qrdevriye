@@ -372,6 +372,18 @@ body, div, span, p, h1, h2, h3, h4, h5, h6, label, input, button {
 <div id="qrScannerModal">
   <div id="qr-reader"></div>
   <button id="closeScanner">Kapat</button>
+  <button id="flashToggle" style="
+  margin-top:10px;
+  padding:12px 18px;
+  border:none;
+  border-radius:10px;
+  background:#f1c40f;
+  color:#000;
+  font-weight:700;
+">
+🔦 Flaş Aç
+</button>
+
 </div>
 <!-- Devriye uyarı modalı -->
 <div id="warningModal" style="
@@ -632,6 +644,17 @@ nobetBitirBtn.addEventListener('click', (e)=>{
 const qrModal = document.getElementById('qrScannerModal');
 const qrReaderDivId = 'qr-reader';
 const closeScanner = document.getElementById('closeScanner');
+closeScanner.addEventListener('click', async () => {
+  try{
+    if(qrScanner){
+      await qrScanner.stop();
+      await qrScanner.clear();
+    }
+  }catch(e){}
+
+  qrModal.style.display = 'none';
+});
+
 let qrScanner = null;
 
 let devriyeStarted = false;
@@ -961,13 +984,22 @@ async function startScanner(pointName, btnEl){
       const matchedPoint = matchedBtn.dataset.point;
 
       // ✅ Daha önce okutulmadıysa
-      if(!readPoints.includes(matchedPoint)){
-        readPoints.push(matchedPoint);
-        await update(activeDevriyeRef, { readPoints });
-      }
+    // 🔁 Daha önce okutulmuş mu?
+if(readPoints.includes(matchedPoint)){
+  showWarningModal(
+    "Bu QR noktasını zaten okuttunuz. Lütfen diğer noktalara geçin.",
+    3000
+  );
+  return;
+}
 
-      matchedBtn.classList.add('read');
-      matchedBtn.nextElementSibling.innerText = 'Tamamlandı';
+// ✅ İlk kez okutuluyorsa
+readPoints.push(matchedPoint);
+await update(activeDevriyeRef, { readPoints });
+
+matchedBtn.classList.add('read');
+matchedBtn.nextElementSibling.innerText = 'Tamamlandı';
+
 
       await qrScanner.stop();
       qrModal.style.display='none';
@@ -1180,9 +1212,29 @@ handleConnectionChange();
 window.addEventListener('online', handleConnectionChange);
 window.addEventListener('offline', handleConnectionChange);
 
+let flashOn = false;
+
+document.getElementById('flashToggle').addEventListener('click', async () => {
+  if(!qrScanner) return;
+
+  try{
+    flashOn = !flashOn;
+
+    await qrScanner.applyVideoConstraints({
+      advanced: [{ torch: flashOn }]
+    });
+
+    document.getElementById('flashToggle').innerText =
+      flashOn ? '🔦 Flaş Kapat' : '🔦 Flaş Aç';
+
+  }catch(e){
+    showWarningModal("Bu cihaz flaşı desteklemiyor");
+  }
+});
 
 </script>
 </body>
 </html>
+
 
 
