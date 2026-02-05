@@ -372,17 +372,16 @@ body, div, span, p, h1, h2, h3, h4, h5, h6, label, input, button {
 <div id="qrScannerModal">
   <div id="qr-reader"></div>
   <button id="closeScanner">Kapat</button>
-  <button id="flashToggleBtn" style="
+  <button id="flashToggle" style="
   margin-top:10px;
-  padding:10px 16px;
+  padding:12px 18px;
   border:none;
   border-radius:10px;
   background:#f1c40f;
   color:#000;
   font-weight:700;
-  cursor:pointer;
 ">
-  🔦 Flaş Aç
+🔦 Flaş Aç
 </button>
 
 </div>
@@ -646,14 +645,6 @@ const qrModal = document.getElementById('qrScannerModal');
 const qrReaderDivId = 'qr-reader';
 const closeScanner = document.getElementById('closeScanner');
 let qrScanner = null;
-const soundCorrect = new Audio("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
-const soundWrong = new Audio("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
-
-soundCorrect.volume = 0.7;
-soundWrong.volume = 0.7;
-
-let flashOn = false;
-
 
 let devriyeStarted = false;
 let devriyeStartTime = null;
@@ -960,9 +951,6 @@ async function startScanner(pointName, btnEl){
     async qrCodeMessage => {
       const qrId = qrCodeMessage.trim();
       if(qrId === btnEl.dataset.qrid){
-	  soundCorrect.currentTime = 0;
-soundCorrect.play();
-
         btnEl.classList.add('read');
         btnEl.nextElementSibling.innerText='Tamamlandı';
         if(!readPoints.includes(pointName)) readPoints.push(pointName);
@@ -974,14 +962,7 @@ soundCorrect.play();
         qrScanner.stop();
         qrModal.style.display='none';
       } else {
-        soundWrong.currentTime = 0;
-soundWrong.play();
-
-showWarningModal(
-  "❌ Bu QR bu noktaya ait değil! Lütfen doğru QR okutunuz.",
-  3000
-);
-
+        alert("QR kod eşleşmedi!");
       }
     },
     err=>{ /* console.log(err) */ }
@@ -989,25 +970,6 @@ showWarningModal(
 }
 
 closeScanner.addEventListener('click', ()=>{
-const flashBtn = document.getElementById("flashToggleBtn");
-
-flashBtn.addEventListener("click", async () => {
-  if(!qrScanner) return;
-
-  try{
-    flashOn = !flashOn;
-
-    await qrScanner.applyVideoConstraints({
-      advanced: [{ torch: flashOn }]
-    });
-
-    flashBtn.innerText = flashOn ? "🔦 Flaş Kapat" : "🔦 Flaş Aç";
-
-  }catch(e){
-    showWarningModal("Bu cihaz flaş desteklemiyor", 2000);
-  }
-});
-
   if(qrScanner) qrScanner.stop();
   qrModal.style.display='none';
 });
@@ -1215,9 +1177,29 @@ handleConnectionChange();
 window.addEventListener('online', handleConnectionChange);
 window.addEventListener('offline', handleConnectionChange);
 
+let flashOn = false;
+
+document.getElementById('flashToggle').addEventListener('click', async () => {
+  if(!qrScanner) return;
+
+  try{
+    flashOn = !flashOn;
+
+    await qrScanner.applyVideoConstraints({
+      advanced: [{ torch: flashOn }]
+    });
+
+    document.getElementById('flashToggle').innerText =
+      flashOn ? '🔦 Flaş Kapat' : '🔦 Flaş Aç';
+
+  }catch(e){
+    showWarningModal("Bu cihaz flaşı desteklemiyor");
+  }
+});
 
 </script>
 </body>
 </html>
+
 
 
