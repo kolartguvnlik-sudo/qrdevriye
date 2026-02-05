@@ -949,15 +949,6 @@ async function startScanner(pointName, btnEl){
     { facingMode:"environment" },
     { fps:10, qrbox:250 },
     async qrCodeMessage => {
-	// 🔴 İnternet YOKSA
-if (!navigator.onLine) {
-  if (qrCodeMessage === pointName) {
-    await qrScanner.stop().catch(()=>{});
-    qrModal.style.display = 'none';
-  }
-  return;
-}
-
       const qrId = qrCodeMessage.trim();
       if(qrId === btnEl.dataset.qrid){
         btnEl.classList.add('read');
