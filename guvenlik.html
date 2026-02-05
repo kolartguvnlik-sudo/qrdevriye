@@ -415,6 +415,11 @@ body, div, span, p, h1, h2, h3, h4, h5, h6, label, input, button {
 <script src="https://unpkg.com/html5-qrcode"></script>
 
 <script type="module">
+// 🔊 QR başarılı okuma bip sesi
+const beep = new Audio(
+  "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQQAAAAA"
+);
+
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 import { getDatabase, ref, onValue, push, set, update, get } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 
@@ -644,7 +649,18 @@ nobetBitirBtn.addEventListener('click', (e)=>{
 const qrModal = document.getElementById('qrScannerModal');
 const qrReaderDivId = 'qr-reader';
 const closeScanner = document.getElementById('closeScanner');
+
 let qrScanner = null;
+let qrProcessing = false; // 🔒 QR okuma kilidi
+
+closeScanner.addEventListener('click', ()=>{
+  if(qrScanner){
+    qrScanner.stop();
+    qrScanner = null; // 🔥 instance temizle
+  }
+  qrModal.style.display = 'none';
+  qrProcessing = false; // 🔓 kilidi aç
+});
 
 let devriyeStarted = false;
 let devriyeStartTime = null;
@@ -949,30 +965,33 @@ async function startScanner(pointName, btnEl){
     { facingMode:"environment" },
     { fps:10, qrbox:250 },
     async qrCodeMessage => {
+	if(qrProcessing) return;
+qrProcessing = true;
+
       const qrId = qrCodeMessage.trim();
-      if(qrId === btnEl.dataset.qrid){
-        btnEl.classList.add('read');
-        btnEl.nextElementSibling.innerText='Tamamlandı';
-        if(!readPoints.includes(pointName)) readPoints.push(pointName);
-		await update(activeDevriyeRef, {
-    readPoints: readPoints
-});
+if(qrId === btnEl.dataset.qrid){
 
-		
-        qrScanner.stop();
-        qrModal.style.display='none';
-      } else {
-        alert("QR kod eşleşmedi!");
-      }
-    },
-    err=>{ /* console.log(err) */ }
-  ).catch(err=>{ alert("Kamera açılamadı: "+err); });
+  beep.play(); // 🔊 bip
+
+  btnEl.classList.add('read');
+  btnEl.nextElementSibling.innerText = 'Tamamlandı';
+
+  if(!readPoints.includes(pointName)){
+    readPoints.push(pointName);
+    await update(activeDevriyeRef, { readPoints });
+  }
+
+  await qrScanner.stop();        // 📷 kamera kapat
+  qrModal.style.display = 'none';
+
+  setTimeout(() => qrProcessing = false, 500); // 🔓 kilidi aç
+  return;
 }
+setTimeout(() => qrProcessing = false, 300);
+ // ❌ yanlış QR
 
-closeScanner.addEventListener('click', ()=>{
-  if(qrScanner) qrScanner.stop();
-  qrModal.style.display='none';
-});
+}); // 👈 BU SATIR YOKTU — ŞART
+
 
 /* === Firebase'den dinamik QR noktalarını çek (mobil uyumlu) === */
 async function loadQRPoints() {
@@ -1031,18 +1050,18 @@ if(readPoints.includes(point.name)){
 
 btn.addEventListener('click', ()=>{
 
-    // 🔒 Eğer bu nokta zaten okutulmuşsa
-    if(btn.classList.contains('read')){
-        showWarningModal(
-            "Bu nokta başarılı bir şekilde okutulmuştur. Lütfen diğer noktaları okutunuz.",
-            2500
-        );
-        return;
-    }
+  if(btn.classList.contains('read')){
+    showWarningModal(
+      "Bu nokta zaten okutulmuştur. Lütfen diğer noktayı okutun.",
+      2500
+    );
+    return;
+  }
 
-    // 🟢 Okutulmamışsa kamera aç
-    startScanner(point.name, btn);
+  qrProcessing = false; // 🔓 yeni tarama öncesi kilidi sıfırla
+  startScanner(point.name, btn);
 });
+
         });
     } catch(err){
         console.error("QR noktaları yüklenirken hata:", err);
