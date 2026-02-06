@@ -257,11 +257,19 @@ if (savedSiteID && savedConfig) {
 }
 
 // Büyük harf
-[secUsername, secPassword].forEach(el=>{
-  el.addEventListener("input", ()=>{
-    el.value = el.value.toLocaleUpperCase('tr-TR'); // 🔥 Türkçe büyük harf
+[secUsername, secPassword].forEach(el => {
+
+  // Yazarken DOKUNMA
+  el.addEventListener("compositionstart", () => el.isComposing = true);
+  el.addEventListener("compositionend", () => el.isComposing = false);
+
+  // Sadece alan terk edilince büyüt
+  el.addEventListener("blur", () => {
+    el.value = el.value.toLocaleUpperCase('tr-TR');
   });
+
 });
+
 
 
 // QR MODAL
@@ -460,4 +468,5 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
+
 
