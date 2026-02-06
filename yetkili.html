@@ -357,28 +357,6 @@ select {
 <div id="createMsg"></div>
 </div>
 
-<!-- Mesaj Gönder Paneli -->
-<div class="panel">
-<h2>Mesaj Gönder</h2>
-<label for="msgType">Mesaj Gönderilecek Tip</label>
-<select id="msgType">
-  <option value="resident">Site Sakini</option>
-  <option value="security">Güvenlik</option>
-</select>
-
-<label for="msgSubject">Konu</label>
-<input type="text" id="msgSubject" placeholder="Mesaj konusu...">
-
-<label for="msgContent">Mesaj</label>
-<textarea id="msgContent" rows="4" placeholder="Mesajınızı buraya yazın..."></textarea>
-
-<button id="sendMsgBtn" style="background:#2980b9; color:#fff;">Gönder</button>
-<div class="progress-container">
-  <div class="progress-bar" id="progressBar">0/0</div>
-</div>
-<div id="msgStatus" style="margin-top:5px; color:#ffcc00;"></div>
-</div>
-
 <!-- Kullanıcı Tablosu Paneli -->
 <div class="panel" style="grid-column: span 2;">
 <h2>Kullanıcılar</h2>
@@ -525,10 +503,20 @@ newType.addEventListener('change', ()=>{
   else { residentFields.style.display='none'; securityFields.style.display='block'; } 
   updatePasswordField(); 
 });
+// ====== Türkçe karakterleri doğru büyük harfe çevirme ======
+function toTurkishUpper(str) {
+  const letters = { 'i': 'İ', 'ı': 'I', 'ş': 'Ş', 'ğ': 'Ğ', 'ü': 'Ü', 'ö': 'Ö', 'ç': 'Ç' };
+  return str.replace(/([iışğüöç])/g, letter => letters[letter]).toUpperCase();
+}
+
+// ====== newFullName input event ======
+document.getElementById('newFullName').addEventListener('input', e => {
+  e.target.value = toTurkishUpper(e.target.value);
+  updatePasswordField();
+});
 
 document.getElementById('newBlock').addEventListener('input', updatePasswordField);
 document.getElementById('newApartment').addEventListener('input', updatePasswordField);
-document.getElementById('newFullName').addEventListener('input', e=>{ e.target.value=e.target.value.toUpperCase(); updatePasswordField(); });
 
 // Kullanıcı listeleme
 const usersTable = document.getElementById('usersTable');
@@ -564,19 +552,30 @@ function renderTable(){
   totalUsersDiv.textContent = `Toplam Kullanıcı: ${filteredUsers.length}`;
   const start = (currentPage-1)*pageSize;
   const end = start + pageSize;
-  filteredUsers.slice(start,end).forEach(u=>{
+filteredUsers.slice(start,end).forEach(u=>{
     const tr = document.createElement('tr');
     const nameCol = u.type==='resident' ? u.username : u.fullName;
     const blockCol = u.type==='resident' ? u.block : u.phone;
     const typeCol = u.type==='resident' ? "Site Sakini" : "Güvenlik";
-    tr.innerHTML = `<td>${nameCol}</td><td>${blockCol}</td><td>${typeCol}</td><td>${u.password}</td>
-                    <td><button class="edit" data-username="${u.username}">Düzenle</button>
-                    <button class="delete" data-username="${u.username}">Sil</button></td>`;
+
+    // Düzenle butonu sadece site sakinleri için
+    const actionBtns = u.type === 'security' 
+      ? `<button class="delete" data-username="${u.username}">Sil</button>` 
+      : `<button class="edit" data-username="${u.username}">Düzenle</button>
+         <button class="delete" data-username="${u.username}">Sil</button>`;
+
+    tr.innerHTML = `<td>${nameCol}</td>
+                    <td>${blockCol}</td>
+                    <td>${typeCol}</td>
+                    <td>${u.type === 'security' ? '****' : u.password}</td>
+                    <td>${actionBtns}</td>`;
     usersTable.appendChild(tr);
-  });
+});
+
   renderPagination();
   attachRowEvents();
 }
+
 
 function renderPagination(){
   paginationDiv.innerHTML='';
@@ -639,84 +638,6 @@ function attachRowEvents(){
 }
 
 // Mesaj Gönderme Özelliği ve Otomatik Satır Kırma
-const sendMsgBtn = document.getElementById('sendMsgBtn');
-const msgContent = document.getElementById('msgContent');
-const msgType = document.getElementById('msgType');
-const msgSubject = document.getElementById('msgSubject');
-const progressBar = document.getElementById('progressBar');
-const msgStatus = document.getElementById('msgStatus');
-
-function formatMessage(text, maxCharsPerLine = 50){
-  const words = text.split(' ');
-  let line = '';
-  let formatted = '';
-  for(const word of words){
-    if((line + word).length > maxCharsPerLine){
-      formatted += line.trim() + '\n';
-      line = word + ' ';
-    } else { line += word + ' '; }
-  }
-  if(line) formatted += line.trim();
-  return formatted;
-}
-
-sendMsgBtn.addEventListener('click', async ()=>{
-  const subject = msgSubject.value.trim();
-  const rawMsg = msgContent.value.trim();
-  if(!subject){ alert("Konu boş olamaz!"); return; }
-  if(!rawMsg){ alert("Mesaj boş olamaz!"); return; }
-
-  const formattedMsg = formatMessage(rawMsg);
-
-  sendMsgBtn.disabled = true;
-  const originalBtnText = sendMsgBtn.textContent;
-  sendMsgBtn.textContent = "Gönderiliyor...";
-
-  const snapshot = await get(ref(db,'users'));
-  const usersObj = snapshot.val() || {};
-  const targetUsers = Object.values(usersObj).filter(u=>u.type===msgType.value);
-  if(targetUsers.length===0){ 
-    alert("Hedef kullanıcı yok!"); 
-    sendMsgBtn.disabled = false;
-    sendMsgBtn.textContent = originalBtnText;
-    return; 
-  }
-
-  let sentCount = 0;
-  progressBar.style.width='0%';
-  progressBar.textContent=`0/${targetUsers.length}`;
-
-  for(const u of targetUsers){
-    const userKey = u.username;
-    const userRef = ref(db, 'messages/' + userKey);
-    const userMsgsSnap = await get(userRef);
-    let userMsgs = userMsgsSnap.exists() ? Object.values(userMsgsSnap.val()) : [];
-
-    if(userMsgs.length >= maxMsgsPerUser) { userMsgs.shift(); }
-
-    const timestamp = Date.now();
-    userMsgs.push({
-      from: currentUser.username,
-      subject: subject,
-      content: formattedMsg,
-      date: new Date().toISOString()
-    });
-    await set(userRef, userMsgs.reduce((acc, m, idx) => { acc[timestamp+idx] = m; return acc; }, {}));
-
-    sentCount++;
-    const percent = (sentCount / targetUsers.length) * 100;
-    progressBar.style.transition = 'width 0.3s';
-    progressBar.style.width = percent + '%';
-    progressBar.textContent = `${sentCount}/${targetUsers.length}`;
-    await new Promise(res=>setTimeout(res,50));
-  }
-
-  msgContent.value='';
-  msgSubject.value='';
-  msgStatus.textContent = "Mesaj gönderildi!";
-  sendMsgBtn.disabled = false;
-  sendMsgBtn.textContent = originalBtnText;
-});
 
 listUsers();
 </script>
