@@ -344,20 +344,7 @@ body, div, span, p, h1, h2, h3, h4, h5, h6, label, input, button {
     <button id="devriyeStartBtn">Devriye Başlat</button>
     <button id="devriyeEndBtn" disabled>Devriyeyi Bitir</button>
 	 <button id="olayBtn" style="background:#f39c12; color:#fff;">Olay Bildir</button> 
-	  <button id="kargoBtn" style="background:#e67e22; color:#fff; padding:12px 18px; border:none; border-radius:10px; margin-top:10px; font-weight:600; position:relative;">
-    Kargo Bildirimi
-    <span id="kargoBadge" style="
-        position:absolute;
-        top:-6px;
-        right:-6px;
-        background:#c0392b;
-        color:#fff;
-        font-size:12px;
-        font-weight:700;
-        padding:2px 6px;
-        border-radius:50%;
-    ">0</span>
-</button>
+
 
 
     <div class="status" id="devriyeStatus">Devriye başlamadı.</div>
@@ -473,27 +460,9 @@ async function loadSiteName(){
 loadSiteName();
 
 
-const kargoBadge = document.getElementById('kargoBadge');
-const kargoRef = ref(db, 'kargoDeliveries');
 
-onValue(kargoRef, snapshot => {
-    const val = snapshot.val();
-    let pendingCount = 0;
 
-    if(val){
-        // Her daireyi ve altındaki kargoları dolaş
-        Object.values(val).forEach(apartment => {
-            Object.values(apartment).forEach(delivery => {
-                if(delivery.status === "Gönderildi"){
-                    pendingCount++;
-                }
-                // "Teslim Alındı" olanlar sayılmaz, otomatik rozetten düşer
-            });
-        });
-    }
 
-    kargoBadge.innerText = pendingCount;
-});
 
 
 
@@ -528,19 +497,6 @@ olayBtn.addEventListener('click', async (e) => {
     }
     window.location.href = 'olay.html';
 });
-
-// Kargo Bildir butonu
-kargoBtn.addEventListener('click', async (e) => {
-    e.preventDefault();
-    const hasNobet = await checkActiveNobet();
-    if(!hasNobet){
-        showWarningModal("Kargo Bildirimlerini Görüntülemek için Önce nöbeti almalısınız!");
-        return;
-    }
-    window.location.href = 'kargog.html';
-});
-
-
 
 
 /* === Profil modal ve işlemleri === */
@@ -912,12 +868,64 @@ function renderDevriyeHistory(){
     item.style.background='rgba(44,62,80,0.6)';
     item.style.borderRadius='10px';
     item.style.fontSize='14px';
-   item.innerHTML=`<strong>Tarih:</strong> ${d.displayDate}<br>
-                <strong>Blok:</strong> ${d.block || 'Bilinmiyor'}<br>
-                <strong>Başlangıç:</strong> ${d.start}<br>
-                <strong>Bitiş:</strong> ${d.end}<br>
-                <strong>Durum:</strong> ${d.status}<br>
-                <strong>Noktalar:</strong> ${Array.isArray(d.points)?d.points.join(', '):''}`;
+let statusHtml = "";
+let pointsHtml = "";
+
+// 🔴 EKSİK DEVRİYE
+if(d.status === "Eksik devriye"){
+  statusHtml = `
+    <span style="
+      color:#e74c3c;
+      font-weight:800;
+      font-size:15px;
+      text-shadow:0 0 8px rgba(231,76,60,0.9);
+    ">
+      ❌ EKSİK DEVRİYE
+    </span>
+  `;
+
+  // Eksik noktaları bul
+  const allPoints = document.querySelectorAll('.qrBtn');
+  const allPointNames = Array.from(allPoints).map(b => b.dataset.point);
+  const scannedPoints = Array.isArray(d.points) ? d.points : [];
+
+const missingPoints = allPointNames.filter(p => {
+  return !scannedPoints.includes(p);
+});
+
+pointsHtml = `
+    <strong style="color:#fff;">Eksik Noktalar:</strong>
+    <span style="color:#fff;">${missingPoints.join(', ')}</span>
+`;
+
+}
+
+// 🟢 TAM DEVRİYE
+if(d.status === "Tam devriye"){
+  statusHtml = `
+    <span style="
+      color:#2ecc71;
+      font-weight:800;
+      font-size:15px;
+      text-shadow:0 0 10px rgba(46,204,113,0.9);
+    ">
+      ✅ TAM DEVRİYE
+    </span>
+  `;
+
+  // Noktalar GÖSTERİLMEZ
+  pointsHtml = "";
+}
+
+item.innerHTML = `
+  <strong>Tarih:</strong> ${d.displayDate}<br>
+  <strong>Blok:</strong> ${d.block || 'Bilinmiyor'}<br>
+  <strong>Başlangıç:</strong> ${d.start}<br>
+  <strong>Bitiş:</strong> ${d.end}<br>
+  <strong>Durum:</strong> ${statusHtml}<br>
+  ${pointsHtml}
+`;
+
     devriyeHistoryEl.appendChild(item);
   });
 }
@@ -1200,5 +1208,6 @@ document.getElementById('flashToggle').addEventListener('click', async () => {
 </script>
 </body>
 </html>
+
 
 
