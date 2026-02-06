@@ -344,20 +344,7 @@ body, div, span, p, h1, h2, h3, h4, h5, h6, label, input, button {
     <button id="devriyeStartBtn">Devriye Başlat</button>
     <button id="devriyeEndBtn" disabled>Devriyeyi Bitir</button>
 	 <button id="olayBtn" style="background:#f39c12; color:#fff;">Olay Bildir</button> 
-	  <button id="kargoBtn" style="background:#e67e22; color:#fff; padding:12px 18px; border:none; border-radius:10px; margin-top:10px; font-weight:600; position:relative;">
-    Kargo Bildirimi
-    <span id="kargoBadge" style="
-        position:absolute;
-        top:-6px;
-        right:-6px;
-        background:#c0392b;
-        color:#fff;
-        font-size:12px;
-        font-weight:700;
-        padding:2px 6px;
-        border-radius:50%;
-    ">0</span>
-</button>
+
 
 
     <div class="status" id="devriyeStatus">Devriye başlamadı.</div>
@@ -473,27 +460,8 @@ async function loadSiteName(){
 loadSiteName();
 
 
-const kargoBadge = document.getElementById('kargoBadge');
-const kargoRef = ref(db, 'kargoDeliveries');
 
-onValue(kargoRef, snapshot => {
-    const val = snapshot.val();
-    let pendingCount = 0;
 
-    if(val){
-        // Her daireyi ve altındaki kargoları dolaş
-        Object.values(val).forEach(apartment => {
-            Object.values(apartment).forEach(delivery => {
-                if(delivery.status === "Gönderildi"){
-                    pendingCount++;
-                }
-                // "Teslim Alındı" olanlar sayılmaz, otomatik rozetten düşer
-            });
-        });
-    }
-
-    kargoBadge.innerText = pendingCount;
-});
 
 
 
@@ -527,17 +495,6 @@ olayBtn.addEventListener('click', async (e) => {
         return;
     }
     window.location.href = 'olay.html';
-});
-
-// Kargo Bildir butonu
-kargoBtn.addEventListener('click', async (e) => {
-    e.preventDefault();
-    const hasNobet = await checkActiveNobet();
-    if(!hasNobet){
-        showWarningModal("Kargo Bildirimlerini Görüntülemek için Önce nöbeti almalısınız!");
-        return;
-    }
-    window.location.href = 'kargog.html';
 });
 
 
@@ -644,6 +601,17 @@ nobetBitirBtn.addEventListener('click', (e)=>{
 const qrModal = document.getElementById('qrScannerModal');
 const qrReaderDivId = 'qr-reader';
 const closeScanner = document.getElementById('closeScanner');
+closeScanner.addEventListener('click', async () => {
+  try{
+    if(qrScanner){
+      await qrScanner.stop();
+      await qrScanner.clear();
+    }
+  }catch(e){}
+
+  qrModal.style.display = 'none';
+});
+
 let qrScanner = null;
 
 let devriyeStarted = false;
@@ -912,12 +880,64 @@ function renderDevriyeHistory(){
     item.style.background='rgba(44,62,80,0.6)';
     item.style.borderRadius='10px';
     item.style.fontSize='14px';
-   item.innerHTML=`<strong>Tarih:</strong> ${d.displayDate}<br>
-                <strong>Blok:</strong> ${d.block || 'Bilinmiyor'}<br>
-                <strong>Başlangıç:</strong> ${d.start}<br>
-                <strong>Bitiş:</strong> ${d.end}<br>
-                <strong>Durum:</strong> ${d.status}<br>
-                <strong>Noktalar:</strong> ${Array.isArray(d.points)?d.points.join(', '):''}`;
+let statusHtml = "";
+let pointsHtml = "";
+
+// 🔴 EKSİK DEVRİYE
+if(d.status === "Eksik devriye"){
+  statusHtml = `
+    <span style="
+      color:#e74c3c;
+      font-weight:800;
+      font-size:15px;
+      text-shadow:0 0 8px rgba(231,76,60,0.9);
+    ">
+      ❌ EKSİK DEVRİYE
+    </span>
+  `;
+
+  // Eksik noktaları bul
+  const allPoints = document.querySelectorAll('.qrBtn');
+  const allPointNames = Array.from(allPoints).map(b => b.dataset.point);
+  const scannedPoints = Array.isArray(d.points) ? d.points : [];
+
+const missingPoints = allPointNames.filter(p => {
+  return !scannedPoints.includes(p);
+});
+
+pointsHtml = `
+    <strong style="color:#fff;">Eksik Noktalar:</strong>
+    <span style="color:#fff;">${missingPoints.join(', ')}</span>
+`;
+
+}
+
+// 🟢 TAM DEVRİYE
+if(d.status === "Tam devriye"){
+  statusHtml = `
+    <span style="
+      color:#2ecc71;
+      font-weight:800;
+      font-size:15px;
+      text-shadow:0 0 10px rgba(46,204,113,0.9);
+    ">
+      ✅ TAM DEVRİYE
+    </span>
+  `;
+
+  // Noktalar GÖSTERİLMEZ
+  pointsHtml = "";
+}
+
+item.innerHTML = `
+  <strong>Tarih:</strong> ${d.displayDate}<br>
+  <strong>Blok:</strong> ${d.block || 'Bilinmiyor'}<br>
+  <strong>Başlangıç:</strong> ${d.start}<br>
+  <strong>Bitiş:</strong> ${d.end}<br>
+  <strong>Durum:</strong> ${statusHtml}<br>
+  ${pointsHtml}
+`;
+
     devriyeHistoryEl.appendChild(item);
   });
 }
@@ -938,41 +958,65 @@ historyToggleBtn.addEventListener('click', ()=>{
 function hasCameraLib(){ return typeof Html5Qrcode !== 'undefined'; }
 
 async function startScanner(pointName, btnEl){
-  if(!devriyeStarted){ alert("Önce devriyeyi başlatın!"); return; }
-  if(!hasCameraLib()){ alert("QR kütüphanesi yüklenemedi!"); return; }
+  if(!devriyeStarted){
+    showWarningModal("Önce devriyeyi başlatın!");
+    return;
+  }
+
   qrModal.style.display='flex';
 
-  if(qrScanner) qrScanner.clear();
+  if(qrScanner) await qrScanner.clear();
   qrScanner = new Html5Qrcode(qrReaderDivId);
 
   qrScanner.start(
     { facingMode:"environment" },
     { fps:10, qrbox:250 },
     async qrCodeMessage => {
-      const qrId = qrCodeMessage.trim();
-      if(qrId === btnEl.dataset.qrid){
-        btnEl.classList.add('read');
-        btnEl.nextElementSibling.innerText='Tamamlandı';
-        if(!readPoints.includes(pointName)) readPoints.push(pointName);
-		await update(activeDevriyeRef, {
-    readPoints: readPoints
-});
 
-		
-        qrScanner.stop();
-        qrModal.style.display='none';
-      } else {
-        alert("QR kod eşleşmedi!");
+      const qrId = qrCodeMessage.trim();
+
+      // 🔎 Sistemde bu QR var mı?
+      const allButtons = document.querySelectorAll('.qrBtn');
+      let matchedBtn = null;
+
+      allButtons.forEach(b=>{
+        if(b.dataset.qrid === qrId){
+          matchedBtn = b;
+        }
+      });
+
+      if(!matchedBtn){
+        showWarningModal("Bu QR bu devriyeye ait değil!");
+        return;
       }
-    },
-    err=>{ /* console.log(err) */ }
-  ).catch(err=>{ alert("Kamera açılamadı: "+err); });
+
+      const matchedPoint = matchedBtn.dataset.point;
+
+      // ✅ Daha önce okutulmadıysa
+    // 🔁 Daha önce okutulmuş mu?
+if(readPoints.includes(matchedPoint)){
+  showWarningModal(
+    "Bu QR noktasını zaten okuttunuz. Lütfen diğer noktalara geçin.",
+    3000
+  );
+  return;
 }
 
-closeScanner.addEventListener('click', ()=>{
-  if(qrScanner) qrScanner.stop();
-  qrModal.style.display='none';
-});
+// ✅ İlk kez okutuluyorsa
+readPoints.push(matchedPoint);
+await update(activeDevriyeRef, { readPoints });
+
+matchedBtn.classList.add('read');
+matchedBtn.nextElementSibling.innerText = 'Tamamlandı';
+
+
+      await qrScanner.stop();
+      qrModal.style.display='none';
+    },
+    err => {}
+  );
+}
+
 
 /* === Firebase'den dinamik QR noktalarını çek (mobil uyumlu) === */
 async function loadQRPoints() {
