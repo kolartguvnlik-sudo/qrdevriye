@@ -258,8 +258,11 @@ if (savedSiteID && savedConfig) {
 
 // Büyük harf
 [secUsername, secPassword].forEach(el=>{
-  el.addEventListener("input", ()=>{ el.value = el.value.toUpperCase(); });
+  el.addEventListener("input", ()=>{
+    el.value = el.value.toLocaleUpperCase('tr-TR'); // 🔥 Türkçe büyük harf
+  });
 });
+
 
 // QR MODAL
 let qrReader = null;
@@ -410,6 +413,7 @@ function openDisconnectModal() { modal.classList.remove("hidden"); }
 function closeDisconnectModal() { modal.classList.add("hidden"); }
 cancelBtn.onclick = closeDisconnectModal;
 confirmBtn.onclick = () => { closeDisconnectModal(); disconnectProject(); };
+
 </script>
 
 <!-- 🔒 DISCONNECT MODAL -->
@@ -456,3 +460,4 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
+
