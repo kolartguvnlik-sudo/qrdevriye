@@ -9,7 +9,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
 <link rel="manifest" href="manifest.json">
 
-
 <style>
 :root {
   color-scheme: dark;
@@ -30,8 +29,7 @@ html, body {
   background: radial-gradient(circle at top, rgba(241,196,15,0.08), transparent 40%),
               linear-gradient(135deg, var(--cga-bg-main), var(--cga-bg-secondary));
   color: var(--cga-text-main);
-    -webkit-touch-callout: none;
-
+  -webkit-touch-callout: none;
 }
 
 .container {
@@ -63,21 +61,31 @@ input::placeholder { color: rgba(236,240,241,0.6); }
 .remember label { cursor:pointer; color:#fff; }
 
 .loginBtn {
-  width:100%; padding:13px; border:none; border-radius:16px; font-weight:700; font-size:16px; cursor:pointer; margin-bottom:24px;
-  background: linear-gradient(90deg,var(--cga-green-dark),var(--cga-green));
-  box-shadow:0 6px 20px rgba(46,204,113,0.45); transition:0.25s;
+  width: 150px;
+  padding: 13px;
+  border: none;
+  border-radius: 16px;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  margin-bottom: 0;
+  background: linear-gradient(90deg, var(--cga-green-dark), var(--cga-green));
+  box-shadow: 0 6px 20px rgba(46,204,113,0.45);
+  transition: 0.25s;
 }
-.loginBtn:hover { background: linear-gradient(90deg,#2ecc71,#27ae60); transform:translateY(-2px); }
+.loginBtn:hover {
+  background: linear-gradient(90deg, #2ecc71, #27ae60);
+  transform: translateY(-2px) scale(1.05);
+}
 
 .message {
   margin-top:15px;
-  margin-bottom:40px; /* 👈 YAZILARI YUKARI ALIR */
+  margin-bottom:40px;
   color:#e74c3c;
   font-weight:600;
   text-align:center;
   min-height:20px;
 }
-
 
 .cga-logo { width:450px; max-width:80%; margin:20px auto 0; }
 .corner-bottom{ position: fixed; bottom:12px; right:14px; font-size:11px; color: rgba(189,195,199,0.7); user-select:none; pointer-events:none; }
@@ -99,9 +107,7 @@ input::placeholder { color: rgba(236,240,241,0.6); }
   background: #000;
 }
 
-.modal-content {
-  max-width: 95%;
-}
+.modal-content { max-width: 95%; }
 .modal {
   position: fixed;
   inset: 0;
@@ -112,9 +118,7 @@ input::placeholder { color: rgba(236,240,241,0.6); }
   z-index: 9999;
 }
 
-.modal.hidden {
-  display: none;
-}
+.modal.hidden { display: none; }
 
 .modal-box {
   background: #1e1e1e;
@@ -140,34 +144,48 @@ input::placeholder { color: rgba(236,240,241,0.6); }
   cursor: pointer;
 }
 
-#cancelDisconnect {
-  background: #555;
-  color: #fff;
-}
+#cancelDisconnect { background: #555; color: #fff; }
+#confirmDisconnect { background: #e74c3c; color: #fff; }
 
-#confirmDisconnect {
-  background: #e74c3c;
-  color: #fff;
-}
-.disconnect-modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.55);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-}
+.disconnect-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.55); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+.disconnect-modal.hidden { display: none; }
 
-.disconnect-modal.hidden {
-  display: none;
+* { -webkit-user-select: none; -ms-user-select: none; user-select: none; }
+
+.choiceBtn {
+  flex:1;
+  border:none;
+  border-radius:10px;
+  font-weight:700;
+  cursor:pointer;
+  background: rgba(255,255,255,0.1);
+  color:#fff;
+  transition:0.25s;
 }
-/* ❌ Sayfa genelinde seçim kapalı */
-* {
-  -webkit-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
+.choiceBtn:hover { background: rgba(46,204,113,0.3); transform: scale(1.05); }
+.choiceBtn.active { background: linear-gradient(90deg,#2ecc71,#27ae60); color:#fff; }
+
+.modal { position: fixed; inset:0; background: rgba(0,0,0,0.55); display:flex; align-items:center; justify-content:center; z-index:9999; transition:0.3s; }
+.modal.hidden { display:none; }
+.modal-box { background:#1e1e1e; border-radius:12px; color:#fff; }
+
+#secLoginBtn {
+  width: 60%;
+  max-width: 220px;
+  padding: 14px 0;
+  margin: 20px auto 0;
+  display: block;
+  font-size: 18px;
+  border-radius: 18px;
+  box-shadow:0 6px 20px rgba(46,204,113,0.45);
+  cursor:pointer;
+  background: linear-gradient(90deg, var(--cga-green-dark), var(--cga-green));
+  color:#fff;
+  font-weight:700;
+  transition:0.25s;
 }
+#secLoginBtn:hover { background: linear-gradient(90deg,#2ecc71,#27ae60); transform: translateY(-2px) scale(1.05); }
+
 </style>
 </head>
 <body>
@@ -175,18 +193,34 @@ input::placeholder { color: rgba(236,240,241,0.6); }
 <div class="container">
   <img src="logo.png" class="cga-logo" alt="CGA Logo">
 
-  <div id="qrSection" style="margin:20px 0; text-align:center;">
-    <button id="startQR" class="loginBtn">📷 QR Kodu Okut</button>
-	<div id="siteName" class="site-name"></div>
-    <div id="qrMessage" style="margin-top:10px; color:#f1c40f;"></div>
+  <div id="qrButtonsWrapper" style="display:flex; gap:8px; justify-content:center; align-items:center; background: rgba(255,255,255,0.05); padding:6px 8px; border-radius:12px; max-width:300px; margin:auto;">
+    <button id="startQR" class="choiceBtn active" style="font-size:14px; padding:6px 10px;">📷 QR Kodu Okut</button>
+    <button id="enterCode" class="choiceBtn" style="font-size:14px; padding:6px 10px;">⌨️ Kod Gir</button>
   </div>
 
-<div id="qrModal" class="modal hidden">
-    <div class="modal-content">
-      <div id="qr-reader"></div>
-      <button id="closeQRModal" class="loginBtn">Kapat</button>
+  <div style="margin-top:10px; text-align:center;">
+    <div id="siteName" class="site-name" style="font-size:24px;"></div>
+    <div id="qrMessage" style="margin-top:4px; color:#f1c40f; font-size:14px;"></div>
+  </div>
+
+  <!-- Kod gir modal -->
+  <div id="codeModal" class="modal hidden">
+    <div class="modal-box" style="padding:20px; max-width:300px; text-align:center;">
+      <h3 style="margin-bottom:12px; color:#f1c40f;">Site Kodunu Gir</h3>
+      <input id="codeInput" type="text" maxlength="4" placeholder="0000" style="width:60%; padding:8px; border-radius:8px; border:none; text-align:center; font-size:16px;">
+      <div style="margin-top:16px; display:flex; gap:10px; justify-content:center;">
+        <button id="codeCancel" class="loginBtn" style="padding:6px 12px; font-size:14px;">İptal</button>
+        <button id="codeConfirm" class="loginBtn" style="padding:6px 12px; font-size:14px;">Onayla</button>
+      </div>
     </div>
   </div>
+
+  <div id="qrModal" class="modal hidden">
+      <div class="modal-content">
+        <div id="qr-reader"></div>
+        <button id="closeQRModal" class="loginBtn">Kapat</button>
+      </div>
+    </div>
 
   <div class="securityText" id="securityBtn">🔐 Güvenlik Girişi</div>
 
@@ -206,8 +240,6 @@ input::placeholder { color: rgba(236,240,241,0.6); }
 <div class="corner-bottom">© 2025 CGA Güvenlik Sistemleri</div>
 <div class="corner-top">v1.0.0</div>
 
-
-
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script type="module">
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
@@ -216,13 +248,13 @@ import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs
 // MERKEZ FIREBASE
 const merkezConfig = {
  apiKey: "AIzaSyAM5NHBpRHIlttNXwJ9YKDypR4eoyQbDeM",
-  authDomain: "kolartguvenlik-e002d.firebaseapp.com",
-  databaseURL: "https://kolartguvenlik-e002d-default-rtdb.firebaseio.com",
-  projectId: "kolartguvenlik-e002d",
-  storageBucket: "kolartguvenlik-e002d.firebasestorage.app",
-  messagingSenderId: "212955174898",
-  appId: "1:212955174898:web:f77501991c1648fb66bd6b",
-  measurementId: "G-TCGDNDYY6Y"
+ authDomain: "kolartguvenlik-e002d.firebaseapp.com",
+ databaseURL: "https://kolartguvenlik-e002d-default-rtdb.firebaseio.com",
+ projectId: "kolartguvenlik-e002d",
+ storageBucket: "kolartguvenlik-e002d.firebasestorage.app",
+ messagingSenderId: "212955174898",
+ appId: "1:212955174898:web:f77501991c1648fb66bd6b",
+ measurementId: "G-TCGDNDYY6Y"
 };
 const merkezApp = getApps().find(a => a.name === "[DEFAULT]") || initializeApp(merkezConfig);
 const merkezDB = getDatabase(merkezApp);
@@ -236,79 +268,74 @@ const secUsername = document.getElementById("secUsername");
 const secPassword = document.getElementById("secPassword");
 const secRemember = document.getElementById("secRemember");
 
-// sayfa yüklenince kullanıcı bilgisi
-window.addEventListener("load", ()=>{
-  securityBtn.click();
-  const secStored = JSON.parse(localStorage.getItem("securityUser"));
-  if(secStored){ secUsername.value=secStored.username; secPassword.value=secStored.password; secRemember.checked=true; }
-});
+const qrBtn = document.getElementById("startQR");
+const codeBtn = document.getElementById("enterCode");
+const codeModal = document.getElementById("codeModal");
+const codeInput = document.getElementById("codeInput");
+const codeCancel = document.getElementById("codeCancel");
+const codeConfirm = document.getElementById("codeConfirm");
+const qrModal = document.getElementById("qrModal");
+const closeQRModal = document.getElementById("closeQRModal");
+let qrReader = null;
 
-// 🔁 Sayfa yenilenince siteyi geri yükle
-const savedSiteID = localStorage.getItem("siteID");
-const savedConfig = localStorage.getItem("siteConfig");
-if (savedSiteID && savedConfig) {
-  const siteConfig = JSON.parse(savedConfig);
-  let siteApp = getApps().find(a => a.name === `siteApp-${savedSiteID}`);
-  if (!siteApp) siteApp = initializeApp(siteConfig, `siteApp-${savedSiteID}`);
-  const siteDB = getDatabase(siteApp);
-  document.getElementById("startQR").style.display = "none";
-  siteNameEl.style.display = "block";
-  loadSiteName(siteDB);
+const modal = document.getElementById("disconnectModal");
+const cancelBtn = document.getElementById("cancelDisconnect");
+const confirmBtn = document.getElementById("confirmDisconnect");
+
+// 💡 Yeni fonksiyonlar
+// 💡 Yeni fonksiyonlar
+function hideQRButtons(){
+  qrBtn.style.display="none";
+  codeBtn.style.display="none";
+  document.getElementById("qrButtonsWrapper").style.display = "none"; // 🌟 wrapper da kayboluyor
 }
 
-// Büyük harf
-[secUsername, secPassword].forEach(el => {
+function showQRButtons(){
+  qrBtn.style.display="flex";
+  codeBtn.style.display="flex";
+  document.getElementById("qrButtonsWrapper").style.display = "flex"; // 🌟 wrapper geri geliyor
+}
 
-  // Yazarken DOKUNMA
+
+// sayfa yüklendiğinde
+window.addEventListener("load", async ()=>{
+  securityBtn.click();
+  const secStored = JSON.parse(localStorage.getItem("securityUser"));
+  if(secStored){ 
+    secUsername.value = secStored.username; 
+    secPassword.value = secStored.password; 
+    secRemember.checked = true; 
+  }
+
+[secUsername, secPassword].forEach(el => {
+  // IME (Türkçe karakter vs.) için
   el.addEventListener("compositionstart", () => el.isComposing = true);
   el.addEventListener("compositionend", () => el.isComposing = false);
 
-  // Sadece alan terk edilince büyüt
+  // kullanıcı inputtan çıkınca büyük harfe çevir
   el.addEventListener("blur", () => {
     el.value = el.value.toLocaleUpperCase('tr-TR');
   });
 
+  // istersen yazarken de canlı büyük yapabilirsin
+  el.addEventListener("input", () => {
+    if(!el.isComposing) { 
+      el.value = el.value.toLocaleUpperCase('tr-TR'); 
+    }
+  });
 });
 
 
-
-// QR MODAL
-let qrReader = null;
-const qrModal = document.getElementById("qrModal");
-const closeQRModal = document.getElementById("closeQRModal");
-
-closeQRModal.addEventListener("click", async () => {
-  qrModal.style.display = "none";
-  if (qrReader) {
-    try { await qrReader.stop(); } catch (e) {}
-    qrReader = null;
-  }
-  document.getElementById("qr-reader").innerHTML = "";
-});
-
-// SITE CONFIG
-async function loadSiteConfig(siteID){
-  try{
-    const snap = await get(child(ref(merkezDB), `sites/${siteID}/config`));
-    if(!snap.exists()){ msg.textContent="Site config bulunamadı!"; return null; }
-    const siteConfig = snap.val();
-    let siteApp = getApps().find(a=>a.name==`siteApp-${siteID}`);
-    if(!siteApp) siteApp = initializeApp(siteConfig, `siteApp-${siteID}`);
+  const savedSiteID = localStorage.getItem("siteID");
+  const savedConfig = localStorage.getItem("siteConfig");
+  if(savedSiteID && savedConfig){
+    const siteConfig = JSON.parse(savedConfig);
+    let siteApp = getApps().find(a=>a.name==`siteApp-${savedSiteID}`);
+    if(!siteApp) siteApp = initializeApp(siteConfig, `siteApp-${savedSiteID}`);
     const siteDB = getDatabase(siteApp);
-    localStorage.setItem("siteID", siteID);
-    localStorage.setItem("siteConfig", JSON.stringify(siteConfig));
-
-    document.getElementById("qrMessage").textContent = "Site ayarları yüklendi, giriş yapabilirsiniz!";
-    document.getElementById("startQR").style.display = "none";
-    siteNameEl.style.display = "block";
+    hideQRButtons();
     await loadSiteName(siteDB);
-    return siteDB;
-  }catch(e){ console.error(e); msg.textContent="QR yüklenirken hata!"; }
-}
-
-// ENTER ile login
-document.addEventListener("keydown", e=>{
-  if(e.key==="Enter" && securityGroup.classList.contains("active")) document.getElementById("secLoginBtn").click();
+  }
 });
 
 // LOGIN
@@ -352,9 +379,7 @@ async function loginUser(username,password,role){
   }catch(err){ console.error(err); msg.textContent="Bağlantı hatası!"; }
 }
 
-document.getElementById("secLoginBtn").addEventListener("click", ()=>{
-  loginUser(secUsername.value, secPassword.value,"security");
-});
+document.getElementById("secLoginBtn").addEventListener("click", ()=> loginUser(secUsername.value, secPassword.value,"security"));
 
 // SITE ADI
 async function loadSiteName(db){
@@ -367,60 +392,139 @@ async function loadSiteName(db){
   }catch(e){ console.error("Site adı yüklenemedi", e); }
 }
 
-// QR Başlatma
-document.getElementById("startQR").addEventListener("click", () => {
+// QR Başlat
+qrBtn.addEventListener("click", ()=>{
+  setActive(qrBtn);
   qrModal.style.display = "flex";
   const qrDiv = document.getElementById("qr-reader");
   qrDiv.innerHTML = "";
-
   qrReader = new Html5Qrcode("qr-reader");
-  const qrBoxSize = Math.min(window.innerWidth * 0.8, 300);
-
+  const qrBoxSize = Math.min(window.innerWidth*0.8,300);
   qrReader.start(
     { facingMode: "environment" },
     { fps: 10, qrbox: qrBoxSize },
-    async (qrCodeMessage) => {
-      try { await qrReader.stop(); } catch(e) {}
-      qrReader = null;
+    async (qrCodeMessage)=>{
+      try{ await qrReader.stop(); }catch(e){}
+      qrReader=null;
       qrModal.style.display = "none";
       await loadSiteConfig(qrCodeMessage);
-      document.getElementById("qrMessage").textContent = "İşlem başarılı, şimdi giriş yapabilirsiniz.";
+      document.getElementById("qrMessage").textContent="İşlem başarılı, şimdi giriş yapabilirsiniz.";
     },
-    (err) => { console.log("QR tarama:", err); }
-  ).catch(err => {
-    alert("Kamera açılamadı: " + err);
+    (err)=>{ console.log("QR tarama:",err);}
+  ).catch(err=>{
+    alert("Kamera açılamadı: "+err);
     qrModal.style.display = "none";
   });
 });
 
-// Disconnect Modal
-let pressTimer = null;
-siteNameEl.addEventListener("mousedown", () => { pressTimer = setTimeout(openDisconnectModal, 800); });
-siteNameEl.addEventListener("mouseup", () => clearTimeout(pressTimer));
-siteNameEl.addEventListener("mouseleave", () => clearTimeout(pressTimer));
-siteNameEl.addEventListener("touchstart", () => { pressTimer = setTimeout(openDisconnectModal, 800); });
-siteNameEl.addEventListener("touchend", () => clearTimeout(pressTimer));
+// Kod Gir buton
+codeBtn.addEventListener("click", ()=>{
+  setActive(codeBtn);
+  codeModal.classList.remove("hidden");
+  codeInput.value="";
+  codeInput.focus();
+});
 
-function disconnectProject() {
+// Kod Modal
+codeCancel.addEventListener("click", ()=> codeModal.classList.add("hidden"));
+codeConfirm.addEventListener("click", async ()=>{
+  const code = codeInput.value.trim();
+  if(!/^\d{4}$/.test(code)){ alert("Lütfen 4 haneli sayı girin!"); return; }
+  codeModal.classList.add("hidden");
+  await loadSiteConfig(code);
+  document.getElementById("qrMessage").textContent="Kod başarıyla yüklendi, giriş yapabilirsiniz!";
+});
+
+// Disconnect Modal
+siteNameEl.addEventListener("mousedown",()=>{ pressTimer=setTimeout(openDisconnectModal,800); });
+siteNameEl.addEventListener("mouseup",()=>clearTimeout(pressTimer));
+siteNameEl.addEventListener("mouseleave",()=>clearTimeout(pressTimer));
+siteNameEl.addEventListener("touchstart",()=>{ pressTimer=setTimeout(openDisconnectModal,800); });
+siteNameEl.addEventListener("touchend",()=>clearTimeout(pressTimer));
+
+function disconnectProject(){
   localStorage.removeItem("siteID");
   localStorage.removeItem("siteConfig");
   sessionStorage.removeItem("currentUser");
-
-  siteNameEl.textContent = "";
-  siteNameEl.style.display = "none";
-  document.getElementById("startQR").style.display = "block";
-  document.getElementById("qrMessage").textContent = "Proje bağlantısından ayrıldınız.";
-  msg.textContent = "";
+  siteNameEl.textContent="";
+  siteNameEl.style.display="none";
+  showQRButtons(); // 🔹 artık iki buton da geri geliyor
+  document.getElementById("qrMessage").textContent="Proje bağlantısından ayrıldınız.";
+  msg.textContent="";
 }
 
-const modal = document.getElementById("disconnectModal");
-const cancelBtn = document.getElementById("cancelDisconnect");
-const confirmBtn = document.getElementById("confirmDisconnect");
-
-function openDisconnectModal() { modal.classList.remove("hidden"); }
-function closeDisconnectModal() { modal.classList.add("hidden"); }
+function openDisconnectModal(){ modal.classList.remove("hidden"); }
+function closeDisconnectModal(){ modal.classList.add("hidden"); }
 cancelBtn.onclick = closeDisconnectModal;
-confirmBtn.onclick = () => { closeDisconnectModal(); disconnectProject(); };
+confirmBtn.onclick = ()=>{ closeDisconnectModal(); disconnectProject(); };
+
+// Aktif buton görseli
+function setActive(button){ [qrBtn, codeBtn].forEach(b=>b.classList.remove("active")); button.classList.add("active"); }
+
+// SITE CONFIG
+async function loadSiteConfig(inputCode){
+  try{
+    let siteID;
+
+    // inputCode 4 haneli sayı mı?
+    if(/^\d{4}$/.test(inputCode)){
+      // 4 haneli kod -> shortCodes'dan al
+      const shortSnap = await get(child(ref(merkezDB), `shortCodes/${inputCode}`));
+      if(!shortSnap.exists()){
+        msg.textContent = "Kısa kod geçersiz!";
+        showQRButtons();
+        return null;
+      }
+      siteID = shortSnap.val();
+    } else {
+      // QR kod ile gelen uzun ID -> direk kullan
+      siteID = inputCode;
+    }
+
+    // sites/<siteID>/config al
+    const siteSnap = await get(child(ref(merkezDB), `sites/${siteID}/config`));
+    if(!siteSnap.exists()){
+      msg.textContent = "Site config bulunamadı!";
+      showQRButtons();
+      return null;
+    }
+
+    const siteConfig = siteSnap.val();
+
+    // App oluştur / kullan
+    let siteApp = getApps().find(a => a.name === `siteApp-${siteID}`);
+    if(!siteApp) siteApp = initializeApp(siteConfig, `siteApp-${siteID}`);
+
+    const siteDB = getDatabase(siteApp);
+
+    // localStorage ve buton işlemleri
+    localStorage.setItem("siteID", siteID);
+    localStorage.setItem("siteConfig", JSON.stringify(siteConfig));
+    hideQRButtons(); // butonları gizle
+    await loadSiteName(siteDB);
+
+    msg.textContent = "Site başarıyla yüklendi!";
+    return siteDB;
+
+  } catch(err){
+    console.error(err);
+    msg.textContent = "Site yüklenirken hata oluştu!";
+    showQRButtons();
+  }
+}
+// QR modal kapatma
+closeQRModal.addEventListener("click", async () => {
+  if(qrReader){
+    try {
+      await qrReader.stop(); // QR tarayıcıyı durdur
+      qrReader.clear();      // Temizle
+    } catch(e){
+      console.error("QR durdurulamadı:", e);
+    }
+    qrReader = null;
+  }
+  qrModal.style.display = "none"; // modalı gizle
+});
 
 </script>
 
@@ -434,6 +538,7 @@ confirmBtn.onclick = () => { closeDisconnectModal(); disconnectProject(); };
     </div>
   </div>
 </div>
+
 <!-- PWA Yükleme Butonu -->
 <button id="installBtn" class="install-btn" style="position: fixed; top: 12px; left: 12px; font-size: 20px; display:none; z-index:500;">📲 Uygulamayı Yükle</button>
 
@@ -468,5 +573,3 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
-
-
